@@ -1,4 +1,4 @@
-name: KayahanOS APK Build
+name: Build APK
 
 on:
   push:
@@ -15,8 +15,8 @@ jobs:
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
-        distribution: 'temurin'
-        java-version: '17'
+        distribution: temurin
+        java-version: 17
 
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
@@ -25,10 +25,10 @@ jobs:
       run: |
         cd android
         chmod +x gradlew || true
-        ./gradlew assembleDebug || echo "No gradle project yet"
+        ./gradlew assembleDebug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: KayahanOS-APK
-        path: android/app/build/outputs/
+        path: android/app/build/outputs/apk/debug/
