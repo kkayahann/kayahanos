@@ -1,0 +1,85 @@
+name: KAYAHANOS AUTONOMOUS RELEASE SYSTEM
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    # ======================
+    # 1. CHECKOUT
+    # ======================
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # ======================
+    # 2. JAVA SETUP
+    # ======================
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: 17
+
+    # ======================
+    # 3. VERSION ENGINE
+    # ======================
+    - name: Generate Version
+      id: version
+      run: |
+        VERSION=$(cat version.txt)
+
+        IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+        PATCH=$((PATCH + 1))
+
+        NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+
+        echo $NEW_VERSION > version.txt
+        echo "VERSION=$NEW_VERSION" >> $GITHUB_ENV
+
+    # ======================
+    # 4. BUILD APK
+    # ======================
+    - name: Build APK
+      run: |
+        chmod +x android/gradlew
+        cd android
+        ./gradlew clean assembleDebug --no-daemon
+
+    # ======================
+    # 5. VERIFY APK
+    # ======================
+    - name: Verify APK
+      run: |
+        FILE="android/app/build/outputs/apk/debug/app-debug.apk"
+        if [ ! -f "$FILE" ]; then
+          echo "APK BUILD FAILED"
+          exit 1
+        fi
+
+    # ======================
+    # 6. CREATE RELEASE
+    # ======================
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ env.VERSION }}
+        name: KayahanOS v${{ env.VERSION }}
+        files: android/app/build/outputs/apk/debug/app-debug.apk
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # ======================
+    # 7. SAVE VERSION
+    # ======================
+    - name: Commit Version Update
+      run: |
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+        git add version.txt
+        git commit -m "auto version bump $VERSION" || true
+        git push
