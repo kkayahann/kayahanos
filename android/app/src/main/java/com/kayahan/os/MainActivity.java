@@ -3,6 +3,7 @@ package com.kayahan.os;
 import android.app.Activity;
 import android.os.Bundle;
 import android.webkit.WebView;
+import android.webkit.WebSettings;
 
 public class MainActivity extends Activity {
     @Override
@@ -10,9 +11,10 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         WebView webView = new WebView(this);
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.loadUrl("file:///android_asset/index.html");
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
 
+        webView.loadUrl("file:///android_asset/index.html");
         setContentView(webView);
     }
 }
