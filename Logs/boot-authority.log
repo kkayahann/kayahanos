@@ -1,0 +1,15 @@
+[BOOT] clean authority scan started
+[1] ACTIVE CORE SEARCH
+[2] BOOT FILE SEARCH
+[3] CONTROL PLANE SEARCH
+[4] SERVICE LOADER SEARCH
+[5] PROCESS MANAGER SEARCH
+[6] DUPLICATE CHECK
+[COUNT] boot files      : 0
+[COUNT] control planes  : 0
+[COUNT] service loaders : 0
+[COUNT] process manager : 0
+[7] ACTIVE ROOT LOCK
+[LOCKED] /data/data/com.termux/files/home/kayahanos/core-os
+[8] FINAL STATUS
+[DONE] clean authority map generated

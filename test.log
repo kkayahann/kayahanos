@@ -1,0 +1,5 @@
+INFO system boot
+ERROR service-loader failed
+CRASH control-plane dead
+require('./kernel/test')
+ERROR lifecycle broken

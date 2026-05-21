@@ -1,0 +1,163 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+echo "========================================="
+echo " KAYAHANOS CLEAN AUTHORITY MAP"
+echo "========================================="
+
+ROOT="$HOME/kayahanos"
+
+LOG="$ROOT/Logs/boot-authority.log"
+MAP="$ROOT/Docs/BOOT_AUTHORITY_MAP.txt"
+
+mkdir -p "$ROOT/Logs"
+mkdir -p "$ROOT/Docs"
+
+: > "$LOG"
+: > "$MAP"
+
+log() {
+    echo "$1" | tee -a "$LOG"
+}
+
+write_map() {
+    echo "$1" >> "$MAP"
+}
+
+IGNORE_PATHS=(
+    "*/node_modules/*"
+    "*/.git/*"
+    "*/dist/*"
+    "*/build/*"
+    "*/cache/*"
+)
+
+build_prune() {
+    PRUNE_ARGS=()
+
+    for p in "${IGNORE_PATHS[@]}"
+    do
+        PRUNE_ARGS+=( -path "$p" -prune -o )
+    done
+
+    echo "${PRUNE_ARGS[@]}"
+}
+
+PRUNE=$(build_prune)
+
+log "[BOOT] clean authority scan started"
+
+write_map "================================="
+write_map " KAYAHANOS CLEAN AUTHORITY MAP"
+write_map "================================="
+write_map ""
+
+echo ""
+log "[1] ACTIVE CORE SEARCH"
+
+eval find "\"$HOME\"" $PRUNE -type d -name "\"core-os\"" 2>/dev/null | while read line
+do
+    log "[FOUND] $line"
+    write_map "[CORE] $line"
+done
+
+echo ""
+log "[2] BOOT FILE SEARCH"
+
+eval find "\"$HOME\"" $PRUNE -type f \( \
+-name "\"BOOT_MASTER.js\"" \
+-o -name "\"boot-orchestrator.js\"" \
+-o -name "\"boot-orchestrator-v2.js\"" \
+-o -name "\"boot.js\"" \
+-o -name "\"bootstrap.js\"" \
+-o -name "\"index.js\"" \
+\) 2>/dev/null | while read line
+do
+    log "[BOOT] $line"
+    write_map "[BOOT] $line"
+done
+
+echo ""
+log "[3] CONTROL PLANE SEARCH"
+
+eval find "\"$HOME\"" $PRUNE -type f -name "\"control-plane.js\"" 2>/dev/null | while read line
+do
+    log "[CONTROL] $line"
+    write_map "[CONTROL] $line"
+done
+
+echo ""
+log "[4] SERVICE LOADER SEARCH"
+
+eval find "\"$HOME\"" $PRUNE -type f -name "\"service-loader.js\"" 2>/dev/null | while read line
+do
+    log "[SERVICE] $line"
+    write_map "[SERVICE] $line"
+done
+
+echo ""
+log "[5] PROCESS MANAGER SEARCH"
+
+eval find "\"$HOME\"" $PRUNE -type f -name "\"process-manager.js\"" 2>/dev/null | while read line
+do
+    log "[PROCESS] $line"
+    write_map "[PROCESS] $line"
+done
+
+echo ""
+log "[6] DUPLICATE CHECK"
+
+BOOT_COUNT=$(grep -c "\[BOOT\]" "$MAP")
+CONTROL_COUNT=$(grep -c "\[CONTROL\]" "$MAP")
+SERVICE_COUNT=$(grep -c "\[SERVICE\]" "$MAP")
+PROCESS_COUNT=$(grep -c "\[PROCESS\]" "$MAP")
+
+log "[COUNT] boot files      : $BOOT_COUNT"
+log "[COUNT] control planes  : $CONTROL_COUNT"
+log "[COUNT] service loaders : $SERVICE_COUNT"
+log "[COUNT] process manager : $PROCESS_COUNT"
+
+echo ""
+log "[7] ACTIVE ROOT LOCK"
+
+ACTIVE_ROOT="$ROOT/core-os"
+
+echo "$ACTIVE_ROOT" > "$ROOT/ROOT_AUTHORITY.lock"
+
+write_map ""
+write_map "================================="
+write_map " ACTIVE ROOT"
+write_map "================================="
+write_map "$ACTIVE_ROOT"
+
+log "[LOCKED] $ACTIVE_ROOT"
+
+echo ""
+log "[8] FINAL STATUS"
+
+if [ "$CONTROL_COUNT" -gt 1 ]; then
+    log "[WARN] MULTIPLE CONTROL PLANES DETECTED"
+fi
+
+if [ "$SERVICE_COUNT" -gt 1 ]; then
+    log "[WARN] MULTIPLE SERVICE LOADERS DETECTED"
+fi
+
+if [ "$PROCESS_COUNT" -gt 1 ]; then
+    log "[WARN] MULTIPLE PROCESS MANAGERS DETECTED"
+fi
+
+echo ""
+log "[DONE] clean authority map generated"
+
+echo ""
+echo "MAP:"
+echo "$MAP"
+
+echo ""
+echo "LOCK:"
+echo "$ROOT/ROOT_AUTHORITY.lock"
+
+echo ""
+echo "========================================="
+echo " CLEAN AUTHORITY SCAN COMPLETE"
+echo "========================================="
