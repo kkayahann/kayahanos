@@ -1,10 +1,3 @@
-const control = require('./kernel/control-plane');
-const bus = require('./kernel/event-bus');
+const boot = require('./kernel/boot');
 
-bus.on("boot", () => {
-  console.log("KAYAHANOS CORE BOOTED");
-});
-
-bus.emit("boot");
-
-console.log("Services:", control.status());
+boot.start();
